@@ -1,0 +1,128 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column; /* Align elements vertically */
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    background-color: #333; /* Soft grey background for the entire page */
+    font-family: 'Inter', sans-serif; /* Use Inter font */
+}
+
+.title-container {
+    width: 100%;
+    text-align: left;
+    margin: 0;
+    padding: 10px 0;
+    background-color: #333; /* Dark background for contrast */
+    color: white; /* Title color */
+}
+
+.title {
+    margin: 5px;
+    font-size: 28px;
+    font-weight: 600; /* Semibold font weight */
+}
+
+.main-container {
+    display: flex;
+    height: 85vh; /* Reduced height to accommodate title */
+    width: 100vw;
+    position: static;
+}
+
+#map {
+    width: 50%; /* Further shrink map width to allow more space for the graph */
+    height: 100%;
+}
+
+.right-container {
+    width: 50%; /* Expanded width for the right side */
+    height: 100vh;
+    background-color: #333; /* Match background color with the title */
+    display: flex;
+    flex-direction: column; /* Arrange children vertically */
+    align-items: center;
+    justify-content: flex-start; /* Align items at the top */
+    padding: 5px;
+    box-sizing: border-box; /* Include padding in the width */
+}
+
+.total-info {
+    width: 100%;
+    display: flex;
+    justify-content: left; /* Center items */
+    flex-direction: row; /* Stack them horizontally */
+    align-items: center; /* Center text */
+    margin-bottom: 0px; /* Margin below to separate from the chart */
+    margin-left: 100px;
+}
+
+.total-buildings, .average-year {
+    font-size: 20px;
+    font-weight: 600;
+    color: #f8f8f8; /* Text color in light grey */
+    background-color: rgba(51, 51, 51, 0.8);
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    margin-bottom: 10px; /* Space between the two */
+}
+
+.chart-container {
+    width: 95%;
+    height: 65%; /* Adjusted height for the chart container */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px; /* Margin below to separate from the legend */
+}
+
+#buildingsChart {
+    width: 60%;
+    height: 100%;
+}
+
+.chart-legend {
+    width: 100%;
+    color: #f8f8f8;
+    display: flex;
+    flex-direction: row; /* Stack items vertically */
+    gap: 5px;
+    text-align: left;
+    padding: 10px;
+    background-color: rgba(51, 51, 51, 0.8);
+    border-radius: 8px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.legend-color {
+    width: 10px;
+    height: 20px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.slider-container {
+    position: absolute;
+    bottom: 80px;
+    left: 20px;
+    padding: 10px;
+    color: #f8f8f8; /* Text color in light grey */
+    border-radius: 8px;
+    z-index: 1200;
+}
+
+
+
+
+
+
+
