@@ -15,15 +15,34 @@ body {
     width: 100%;
     text-align: left;
     margin: 0;
-    padding: 10px 0;
+    padding: 10px 20px;
     background-color: #333; /* Dark background for contrast */
     color: white; /* Title color */
+    display: flex; /* Flex container for title and button */
+    align-items: center; /* Center vertically */
+    justify-content: space-between; /* Space between title and button */
 }
 
 .title {
-    margin: 5px;
+    margin: 0;
     font-size: 28px;
     font-weight: 600; /* Semibold font weight */
+}
+
+.back-button {
+    padding: 10px 20px;
+    background-color: #A3D69A; /* Same color as the city buttons */
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+    background-color: #88b682; /* Darker shade on hover */
 }
 
 .main-container {
@@ -34,12 +53,12 @@ body {
 }
 
 #map {
-    width: 50%; /* Further shrink map width to allow more space for the graph */
+    width: 50%; /* Adjust map width */
     height: 100%;
 }
 
 .right-container {
-    width: 50%; /* Expanded width for the right side */
+    width: 50%; /* Adjusted width for the right side */
     height: 100vh;
     background-color: #333; /* Match background color with the title */
     display: flex;
@@ -53,7 +72,7 @@ body {
 .total-info {
     width: 100%;
     display: flex;
-    justify-content: left; /* Center items */
+    justify-content: left; /* Align items to the left */
     flex-direction: row; /* Stack them horizontally */
     align-items: center; /* Center text */
     margin-bottom: 0px; /* Margin below to separate from the chart */
@@ -89,7 +108,7 @@ body {
     width: 100%;
     color: #f8f8f8;
     display: flex;
-    flex-direction: row; /* Stack items vertically */
+    flex-direction: row; /* Stack items horizontally */
     gap: 5px;
     text-align: left;
     padding: 10px;
@@ -144,8 +163,31 @@ body {
     background-color: #88b682; /* Darker shade on hover */
 }
 
+/* Mobile-specific styling */
+@media (max-width: 768px) {
+    .right-container, .total-info, .chart-container, .chart-legend { /* Hide all except map and sliders */
+        display: none;
+    }
 
+    .main-container {
+        flex-direction: column; /* Stack elements vertically */
+        height: auto; /* Adjust height */
+        width: 100%; /* Full width for mobile */
+        margin: 0;
+        padding: 0;
+    }
 
+    #map {
+        width: 100%; /* Full width for mobile */
+        height: calc(100vh - 80px); /* Adjust map height for mobile to fill screen */
+    }
 
-
-
+    .slider-container { /* Adjust slider container */
+        bottom: 20px; /* Move slider up */
+        left: 10px; /* Adjust left position */
+        width: calc(100% - 20px); /* Full width with some margin */
+        background-color: #333; /* Match background for better visibility */
+        padding: 10px;
+        border-radius: 8px;
+    }
+}
