@@ -120,6 +120,29 @@ body {
     z-index: 1200;
 }
 
+.city-selection-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh; /* Adjust height to center buttons */
+    flex-direction: column;
+}
+
+.city-button {
+    font-size: 20px;
+    font-weight: 600;
+    padding: 15px 30px;
+    margin: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: #A3D69A; /* Same color palette as the buildings */
+    color: #fff;
+    cursor: pointer;
+}
+
+.city-button:hover {
+    background-color: #88b682; /* Darker shade on hover */
+}
 
 
 

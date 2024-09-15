@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building Age Visualization</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Title positioned on top of the map -->
+    <div class="title-container">
+        <h1 class="title">Building Age Visualization</h1>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Map Container -->
+        <div id="map"></div>
+
+        <!-- Right-side Container for Total Count, Average Year, Chart, and Legend -->
+        <div class="right-container">
+            <!-- Total Buildings and Average Year Display -->
+            <div class="total-info">
+                <div id="total-buildings" class="total-buildings">Total Buildings: 0</div>
+                <div id="average-year" class="average-year">Average Year: 0</div>
+            </div>
+            <!-- Chart Container -->
+            <div class="chart-container">
+                <canvas id="buildingsChart"></canvas>
+            </div>
+            <!-- Legend for Chart Colors -->
+            <div class="chart-legend">
+                <div class="legend-item"><span class="legend-color" style="background-color: #B26D5B;"></span> Before 1940</div>
+                <div class="legend-item"><span class="legend-color" style="background-color: #AE876B;"></span> 1940-1959</div>
+                <div class="legend-item"><span class="legend-color" style="background-color: #ABA27B;"></span> 1960-1979</div>
+                <div class="legend-item"><span class="legend-color" style="background-color: #A7BC8A;"></span> 1980-1999</div>
+                <div class="legend-item"><span class="legend-color" style="background-color: #A3D69A;"></span> 2000+</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Year Range Slider Container -->
+    <div class="slider-container">
+        <label for="year-slider-min">Select Year Range:</label>
+        <input type="range" id="year-slider-min" min="1900" max="2024" step="1" value="1900">
+        <input type="range" id="year-slider-max" min="1900" max="2024" step="1" value="2024">
+        <span id="year-range">1900 - 2024</span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

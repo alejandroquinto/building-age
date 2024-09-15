@@ -1,7 +1,23 @@
 const mapboxAccessToken = 'pk.eyJ1IjoiYWxlamFuZHJvcXVpbnRvIiwiYSI6ImNseDZxbGFpcjE1ZHMyanNjZWg1eDIzejkifQ.VYiLvOBYgX5WwchhqO0I8w';
 
-// Initialize the map and set its view to Gandia, Spain
-const map = L.map('map').setView([38.9673, -0.1819], 14); // Gandia coordinates
+// Get the selected city from URL parameters
+const urlParams = new URLSearchParams(window.location.search);
+const city = urlParams.get('city') || 'gandia'; // Default to Gandia if no city is provided
+
+// Initialize the map and set its view to the selected city
+const cityCoordinates = {
+    'gandia': [38.9673, -0.1819],
+    'crevillente': [38.2496, -0.8127],
+    'valencia': [39.4699, -0.3763], // Add Valencia coordinates
+};
+
+const cityDataFiles = {
+    'gandia': 'building-gandia.geojson',
+    'crevillente': 'building-crevillente.geojson',
+    'valencia': 'building-valencia.geojson' // Add Valencia GeoJSON file reference
+};
+
+const map = L.map('map').setView(cityCoordinates[city], 14);
 
 // Add a darker Mapbox tile layer to the map
 L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=' + mapboxAccessToken, {
@@ -46,19 +62,19 @@ const buildingsChart = new Chart(ctx, {
         scales: {
             x: { 
                 beginAtZero: true, 
-                title: { display: true, text: 'Número de construcciones', color: '#ffffff' }, // White font color
+                title: { display: true, text: 'Number of Buildings', color: '#ffffff' }, // White font color
                 grid: { display: false },
                 ticks: {
-                    font: { family: 'Inter', weight: '800' }, // Use Inter font
+                    font: { family: 'Inter', weight: '600' }, // Use Inter font
                     color: '#ffffff' // White font color
                 }
             },
             y: {
                 beginAtZero: true,
-                title: { display: true, text: 'Años', padding: {top: 0, bottom: 10}, color: '#ffffff' }, // White font color
+                title: { display: true, text: 'Years', padding: {top: 0, bottom: 30}, color: '#ffffff' }, // White font color
                 grid: { display: false },
                 ticks: {
-                    font: { family: 'Inter', weight: '800' }, // Use Inter font
+                    font: { family: 'Inter', weight: '600' }, // Use Inter font
                     color: '#ffffff' // White font color
                 }
             }
@@ -87,7 +103,9 @@ function updateChart(buildingCounts) {
 }
 
 function loadBuildingsByYearRange(minYear, maxYear) {
-    fetch('building-gandia.geojson')
+    const dataFile = cityDataFiles[city]; // Get the appropriate GeoJSON file for the selected city
+
+    fetch(dataFile)
         .then(response => response.json())
         .then(data => {
             if (!data.features || data.features.length === 0) return;
@@ -121,7 +139,7 @@ function loadBuildingsByYearRange(minYear, maxYear) {
                 },
                 onEachFeature: function(feature, layer) {
                     const year = extractYear(feature.properties.beginning);
-                    layer.bindPopup(`Año de construcción: ${year}`);
+                    layer.bindPopup(`Building Age: ${year}`);
                 }
             }).addTo(map);
 
