@@ -8,13 +8,15 @@ const city = urlParams.get('city') || 'gandia'; // Default to Gandia if no city 
 const cityCoordinates = {
     'gandia': [38.9673, -0.1819],
     'crevillente': [38.2496, -0.8127],
-    'valencia': [39.4699, -0.3763], // Add Valencia coordinates
+    'valencia': [39.4699, -0.3763], 
+    'benidorm': [38.5411, -0.1225] // Add Benidorm coordinates
 };
 
 const cityDataFiles = {
     'gandia': 'building-gandia.geojson',
     'crevillente': 'building-crevillente.geojson',
-    'valencia': 'building-valencia.geojson' // Add Valencia GeoJSON file reference
+    'valencia': 'building-valencia.geojson',
+    'benidorm': 'building-benidorm.geojson' // Add Benidorm GeoJSON file reference
 };
 
 const map = L.map('map').setView(cityCoordinates[city], 14);
