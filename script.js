@@ -9,14 +9,18 @@ const cityCoordinates = {
     'gandia': [38.9673, -0.1819],
     'crevillente': [38.2496, -0.8127],
     'valencia': [39.4699, -0.3763], 
-    'benidorm': [38.5411, -0.1225] // Add Benidorm coordinates
+    'benidorm': [38.5411, -0.1225], 
+    'elche': [38.2669, -0.6984], // Add Elche coordinates
+    'alcoy': [38.7054, -0.4743]  // Add Alcoy coordinates
 };
 
 const cityDataFiles = {
     'gandia': 'building-gandia.geojson',
     'crevillente': 'building-crevillente.geojson',
     'valencia': 'building-valencia.geojson',
-    'benidorm': 'building-benidorm.geojson' // Add Benidorm GeoJSON file reference
+    'benidorm': 'building-benidorm.geojson',
+    'elche': 'building-elche.geojson', // Add Elche GeoJSON file reference
+    'alcoy': 'building-alcoy.geojson'  // Add Alcoy GeoJSON file reference
 };
 
 const map = L.map('map').setView(cityCoordinates[city], 14);
