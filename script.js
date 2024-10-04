@@ -8,10 +8,11 @@ const city = urlParams.get('city') || 'gandia'; // Default to Gandia if no city 
 const cityCoordinates = {
     'gandia': [38.9673, -0.1819],
     'crevillente': [38.2496, -0.8127],
-    'valencia': [39.4699, -0.3763], 
-    'benidorm': [38.5411, -0.1225], 
-    'elche': [38.2669, -0.6984], // Add Elche coordinates
-    'alcoy': [38.7054, -0.4743]  // Add Alcoy coordinates
+    'valencia': [39.4699, -0.3763],
+    'benidorm': [38.5411, -0.1225],
+    'elche': [38.2669, -0.6984],
+    'alcoy': [38.7054, -0.4743],
+    'coruna': [43.3623, -8.4115]  // Coordinates for A Coruña
 };
 
 const cityDataFiles = {
@@ -19,8 +20,9 @@ const cityDataFiles = {
     'crevillente': 'building-crevillente.geojson',
     'valencia': 'building-valencia.geojson',
     'benidorm': 'building-benidorm.geojson',
-    'elche': 'building-elche.geojson', // Add Elche GeoJSON file reference
-    'alcoy': 'building-alcoy.geojson'  // Add Alcoy GeoJSON file reference
+    'elche': 'building-elche.geojson',
+    'alcoy': 'building-alcoy.geojson',
+    'coruna': 'building-coruna.geojson'  // Add the A Coruña GeoJSON file reference
 };
 
 const map = L.map('map').setView(cityCoordinates[city], 14);
@@ -61,38 +63,38 @@ const buildingsChart = new Chart(ctx, {
         }]
     },
     options: {
-        indexAxis: 'y',  // Keep 'y' to have horizontal bars
+        indexAxis: 'y',  // Horizontal bars
         plugins: {
-            legend: { display: false } // Remove the legend
+            legend: { display: false }
         },
         scales: {
-            x: { 
-                beginAtZero: true, 
-                title: { display: true, text: 'Number of Buildings', color: '#ffffff' }, // White font color
+            x: {
+                beginAtZero: true,
+                title: { display: true, text: 'Number of Buildings', color: '#ffffff' },
                 grid: { display: false },
                 ticks: {
-                    font: { family: 'Inter', weight: '600' }, // Use Inter font
-                    color: '#ffffff' // White font color
+                    font: { family: 'Inter', weight: '600' },
+                    color: '#ffffff'
                 }
             },
             y: {
                 beginAtZero: true,
-                title: { display: true, text: 'Years', padding: {top: 0, bottom: 30}, color: '#ffffff' }, // White font color
+                title: { display: true, text: 'Years', padding: { top: 0, bottom: 30 }, color: '#ffffff' },
                 grid: { display: false },
                 ticks: {
-                    font: { family: 'Inter', weight: '600' }, // Use Inter font
-                    color: '#ffffff' // White font color
+                    font: { family: 'Inter', weight: '600' },
+                    color: '#ffffff'
                 }
             }
         },
-        animation: { duration: 800 } // Reduce animation time to make it smoother
+        animation: { duration: 800 }
     }
 });
 
 function updateChart(buildingCounts) {
     const years = Object.keys(buildingCounts).sort((a, b) => a - b);
     const counts = years.map(year => buildingCounts[year]);
-    const colors = years.map(year => getColor(parseInt(year))); // Match bar colors
+    const colors = years.map(year => getColor(parseInt(year)));
 
     buildingsChart.data.labels = years;
     buildingsChart.data.datasets[0].data = counts;
@@ -102,14 +104,13 @@ function updateChart(buildingCounts) {
     const totalBuildings = counts.reduce((sum, count) => sum + count, 0);
     document.getElementById('total-buildings').innerText = `Total Buildings: ${totalBuildings}`;
 
-    // Calculate the average year of visible buildings
     const totalYears = years.reduce((sum, year, index) => sum + (year * counts[index]), 0);
     const averageYear = (totalBuildings > 0) ? Math.round(totalYears / totalBuildings) : 0;
     document.getElementById('average-year').innerText = `Average Year: ${averageYear}`;
 }
 
 function loadBuildingsByYearRange(minYear, maxYear) {
-    const dataFile = cityDataFiles[city]; // Get the appropriate GeoJSON file for the selected city
+    const dataFile = cityDataFiles[city];
 
     fetch(dataFile)
         .then(response => response.json())
@@ -140,7 +141,7 @@ function loadBuildingsByYearRange(minYear, maxYear) {
                     return {
                         color: getColor(year),
                         weight: 1,
-                        fillOpacity: 0.5  // Decrease opacity slightly
+                        fillOpacity: 0.5
                     };
                 },
                 onEachFeature: function(feature, layer) {
