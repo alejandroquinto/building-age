@@ -12,7 +12,8 @@ const cityCoordinates = {
     'benidorm': [38.5411, -0.1225],
     'elche': [38.2669, -0.6984],
     'alcoy': [38.7054, -0.4743],
-    'coruna': [43.3623, -8.4115]  // Coordinates for A Coruña
+    'coruna': [43.3623, -8.4115],  // Coordinates for A Coruña
+    'antigua': [28.4200, -14.0167], // Coordinates for Antigua, Fuerteventura, Spain
 };
 
 const cityDataFiles = {
@@ -22,7 +23,8 @@ const cityDataFiles = {
     'benidorm': 'building-benidorm.geojson',
     'elche': 'building-elche.geojson',
     'alcoy': 'building-alcoy.geojson',
-    'coruna': 'building-coruna.geojson'  // Add the A Coruña GeoJSON file reference
+    'coruna': 'building-coruna.geojson',  // Add the A Coruña GeoJSON file reference
+    'antigua': 'building-antigua.geojson',
 };
 
 const map = L.map('map').setView(cityCoordinates[city], 14);
