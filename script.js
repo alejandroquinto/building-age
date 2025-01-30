@@ -14,6 +14,7 @@ const cityCoordinates = {
     'alcoy': [38.7054, -0.4743],
     'coruna': [43.3623, -8.4115],  // Coordinates for A Coruña
     'antigua': [28.4200, -14.0167], // Coordinates for Antigua, Fuerteventura, Spain
+    'grancanaria': [28.1235, -15.4363], // Coordinates for Las Palmas de Gran Canaria
 };
 
 const cityDataFiles = {
@@ -25,6 +26,7 @@ const cityDataFiles = {
     'alcoy': 'building-alcoy.geojson',
     'coruna': 'building-coruna.geojson',  // Add the A Coruña GeoJSON file reference
     'antigua': 'building-antigua.geojson',
+    'grancanaria': 'building-grancanaria.geojson', // GeoJSON file for Las Palmas de Gran Canaria
 };
 
 const map = L.map('map').setView(cityCoordinates[city], 14);
