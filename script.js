@@ -1,176 +1,258 @@
+/* Mapbox token */
 const mapboxAccessToken = 'pk.eyJ1IjoiYWxlamFuZHJvcXVpbnRvIiwiYSI6ImNseDZxbGFpcjE1ZHMyanNjZWg1eDIzejkifQ.VYiLvOBYgX5WwchhqO0I8w';
 
-// Get the selected city from URL parameters
-const urlParams = new URLSearchParams(window.location.search);
-const city = urlParams.get('city') || 'gandia'; // Default to Gandia if no city is provided
-
-// Initialize the map and set its view to the selected city
+/* Cities & data files */
 const cityCoordinates = {
-    'gandia': [38.9673, -0.1819],
-    'crevillente': [38.2496, -0.8127],
-    'valencia': [39.4699, -0.3763],
-    'benidorm': [38.5411, -0.1225],
-    'elche': [38.2669, -0.6984],
-    'alcoy': [38.7054, -0.4743],
-    'coruna': [43.3623, -8.4115],  // Coordinates for A Coruña
-    'antigua': [28.4200, -14.0167], // Coordinates for Antigua, Fuerteventura, Spain
-    'grancanaria': [28.1235, -15.4363], // Coordinates for Las Palmas de Gran Canaria
+  gandia:[38.9673,-0.1819],
+  crevillente:[38.2496,-0.8127],
+  valencia:[39.4699,-0.3763],
+  benidorm:[38.5411,-0.1225],
+  elche:[38.2669,-0.6984],
+  alcoy:[38.7054,-0.4743],
+  coruna:[43.3623,-8.4115],
+  antigua:[28.4200,-14.0167],
+  grancanaria:[28.1235,-15.4363],
 };
-
 const cityDataFiles = {
-    'gandia': 'building-gandia.geojson',
-    'crevillente': 'building-crevillente.geojson',
-    'valencia': 'building-valencia.geojson',
-    'benidorm': 'building-benidorm.geojson',
-    'elche': 'building-elche.geojson',
-    'alcoy': 'building-alcoy.geojson',
-    'coruna': 'building-coruna.geojson',  // Add the A Coruña GeoJSON file reference
-    'antigua': 'building-antigua.geojson',
-    'grancanaria': 'building-grancanaria.geojson', // GeoJSON file for Las Palmas de Gran Canaria
+  gandia:'building-gandia.geojson',
+  crevillente:'building-crevillente.geojson',
+  valencia:'building-valencia.geojson',
+  benidorm:'building-benidorm.geojson',
+  elche:'building-elche.geojson',
+  alcoy:'building-alcoy.geojson',
+  coruna:'building-coruna.geojson',
+  antigua:'building-antigua.geojson',
+  grancanaria:'building-grancanaria.geojson',
 };
 
-const map = L.map('map').setView(cityCoordinates[city], 14);
+/* DOM */
+const loadingEl = document.getElementById('loading');
+const citySelect = document.getElementById('citySelect');
+const yearMinEl = document.getElementById('yearMin');
+const yearMaxEl = document.getElementById('yearMax');
+const yearBadge = document.getElementById('yearBadge');
+const kpiTotal = document.getElementById('kpiTotal');
+const kpiAvg = document.getElementById('kpiAvg');
+const kpiMedian = document.getElementById('kpiMedian');
+const resetBtn = document.getElementById('resetBtn');
+const emptyEl = document.getElementById('emptyState');
 
-// Add a darker Mapbox tile layer to the map
-L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=' + mapboxAccessToken, {
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://www.mapbox.com/">Mapbox</a> contributors',
-    tileSize: 512,
-    zoomOffset: -1
-}).addTo(map);
+/* Utils */
+function extractYear(beginning){
+  const yearMatch = beginning?.match?.(/\b(19|20)\d{2}\b/);
+  return yearMatch ? parseInt(yearMatch[0]) : null;
+}
+function getColor(year){
+  if(year >= 2000) return '#A3D69A';
+  else if(year >= 1980) return '#A7BC8A';
+  else if(year >= 1960) return '#ABA27B';
+  else if(year >= 1940) return '#AE876B';
+  else return '#B26D5B';
+}
 
+/* State */
+const params = new URLSearchParams(location.search);
+let currentCity = params.get('city') || 'gandia';
+let yearMin = 1900, yearMax = 2024;
+const cityCache = {};
+let fitOnNextRender = true;
+
+/* Map */
+const map = L.map('map', { zoomControl: true }).setView(cityCoordinates[currentCity], 14);
+L.tileLayer(
+  `https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=${mapboxAccessToken}`,
+  { maxZoom:19, tileSize:512, zoomOffset:-1, attribution:'© Mapbox' }
+).addTo(map);
 let buildingLayer;
 
-function extractYear(beginning) {
-    const yearMatch = beginning.match(/\b(19|20)\d{2}\b/);
-    return yearMatch ? parseInt(yearMatch[0]) : null;
+function featureStyle(feature){
+  const y = extractYear(feature.properties.beginning);
+  return { color:getColor(y), weight:1, fillOpacity:.45 };
+}
+function featureHover(e){ e.target.setStyle({ weight:2, fillOpacity:.7 }); e.target.bringToFront(); }
+function featureOut(e){ e.target.setStyle({ weight:1, fillOpacity:.45 }); }
+
+/* Era bucketing — clean, limited labels */
+function eraKey(y){
+  if(y<=1939) return '≤1939';
+  if(y>=2020) return '≥2020';
+  const decade = Math.floor(y/10)*10; // 1940 -> "40s"
+  const short = String(decade).slice(2,4);
+  return `${short}s`;
+}
+const ERA_ORDER = ['≤1939','40s','50s','60s','70s','80s','90s','00s','10s','20s','≥2020'];
+
+function computeEraCounts(features){
+  const counts = {};
+  let total=0, sum=0;
+  const yearFreq = {};
+
+  for(const f of features){
+    const y = extractYear(f.properties?.beginning);
+    if(y==null || y<yearMin || y>yearMax) continue;
+    const key = eraKey(y);
+    counts[key] = (counts[key]||0)+1;
+    total++; sum += y;
+    yearFreq[y] = (yearFreq[y]||0)+1;
+  }
+  const labels = ERA_ORDER.filter(k => counts[k]); // keep only present eras
+  const values = labels.map(k=>counts[k]);
+  const avg = total ? Math.round(sum/total) : null;
+  const median = total ? weightedMedian(yearFreq) : null;
+  return { labels, values, total, avg, median };
+}
+function weightedMedian(freqMap){
+  const entries = Object.entries(freqMap).map(([y,c])=>[+y,+c]).sort((a,b)=>a[0]-b[0]);
+  const n = entries.reduce((s, [,c])=>s+c, 0);
+  let run=0;
+  for(const [y,c] of entries){ run += c; if(run >= n/2) return y; }
+  return null;
 }
 
-function getColor(year) {
-    if (year >= 2000) return '#A3D69A';
-    else if (year >= 1980) return '#A7BC8A';
-    else if (year >= 1960) return '#ABA27B';
-    else if (year >= 1940) return '#AE876B';
-    else return '#B26D5B';
-}
-
+/* Chart (vertical, smooth, not crowded) */
 const ctx = document.getElementById('buildingsChart').getContext('2d');
-const buildingsChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: [],
-        datasets: [{
-            data: [],
-            backgroundColor: [], // Initialize with empty, to be updated dynamically
-            borderColor: '#808080',
-            borderWidth: 1
-        }]
-    },
-    options: {
-        indexAxis: 'y',  // Horizontal bars
-        plugins: {
-            legend: { display: false }
-        },
-        scales: {
-            x: {
-                beginAtZero: true,
-                title: { display: true, text: 'Number of Buildings', color: '#ffffff' },
-                grid: { display: false },
-                ticks: {
-                    font: { family: 'Inter', weight: '600' },
-                    color: '#ffffff'
-                }
-            },
-            y: {
-                beginAtZero: true,
-                title: { display: true, text: 'Years', padding: { top: 0, bottom: 30 }, color: '#ffffff' },
-                grid: { display: false },
-                ticks: {
-                    font: { family: 'Inter', weight: '600' },
-                    color: '#ffffff'
-                }
-            }
-        },
-        animation: { duration: 800 }
+function makeGradient(ctx){
+  const g = ctx.createLinearGradient(0,0,0,240);
+  g.addColorStop(0,'rgba(255,255,255,0.90)');
+  g.addColorStop(1,'rgba(255,255,255,0.55)');
+  return g;
+}
+const chart = new Chart(ctx, {
+  type:'bar',
+  data:{ labels:[], datasets:[{ data:[], backgroundColor: makeGradient(ctx), borderWidth:0, borderRadius:10, barThickness:20, maxBarThickness:28 }]},
+  options:{
+    animation:{ duration:600, easing:'easeOutQuart' },
+    plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>` ${c.formattedValue} buildings` }}},
+    scales:{
+      x:{ grid:{ color:'rgba(255,255,255,.04)' }, ticks:{ color:'#e8edf2', font:{ family:'Inter', weight:'700' }}},
+      y:{ beginAtZero:true, grid:{ display:false }, ticks:{ color:'#e8edf2', font:{ family:'Inter', weight:'700' }}, title:{ display:true, text:'Count', color:'#e8edf2' } }
     }
+  }
 });
 
-function updateChart(buildingCounts) {
-    const years = Object.keys(buildingCounts).sort((a, b) => a - b);
-    const counts = years.map(year => buildingCounts[year]);
-    const colors = years.map(year => getColor(parseInt(year)));
+/* Data load/render */
+async function loadCityData(city){
+  if(cityCache[city]) return cityCache[city];
+  loading(true);
+  try{
+    const res = await fetch(cityDataFiles[city]);
+    const gj = await res.json();
+    cityCache[city] = gj;
+    return gj;
+  } finally { loading(false); }
+}
+function loading(v){ loadingEl?.classList.toggle('hidden', !v); }
 
-    buildingsChart.data.labels = years;
-    buildingsChart.data.datasets[0].data = counts;
-    buildingsChart.data.datasets[0].backgroundColor = colors;
-    buildingsChart.update();
+function renderLayer(geojson){
+  if(buildingLayer) map.removeLayer(buildingLayer);
+  const filtered = {
+    type:'FeatureCollection',
+    features: geojson.features.filter(f=>{
+      const y = extractYear(f.properties?.beginning);
+      return y!==null && y>=yearMin && y<=yearMax;
+    })
+  };
+  buildingLayer = L.geoJSON(filtered, {
+    style: featureStyle,
+    onEachFeature: (feature, layer)=>{
+      const y = extractYear(feature.properties.beginning);
+      layer.bindPopup(`<b>Year</b>: ${y ?? 'Unknown'}`);
+      layer.on({ mouseover:featureHover, mouseout:featureOut });
+    }
+  }).addTo(map);
 
-    const totalBuildings = counts.reduce((sum, count) => sum + count, 0);
-    document.getElementById('total-buildings').innerText = `Total Buildings: ${totalBuildings}`;
-
-    const totalYears = years.reduce((sum, year, index) => sum + (year * counts[index]), 0);
-    const averageYear = (totalBuildings > 0) ? Math.round(totalYears / totalBuildings) : 0;
-    document.getElementById('average-year').innerText = `Average Year: ${averageYear}`;
+  if(fitOnNextRender && filtered.features.length){
+    try { map.fitBounds(buildingLayer.getBounds(), { padding:[20,20] }); } catch(e){}
+    fitOnNextRender = false; // don’t jump on every filter
+  }
+  emptyEl?.classList.toggle('hidden', filtered.features.length>0);
+  return filtered.features;
 }
 
-function loadBuildingsByYearRange(minYear, maxYear) {
-    const dataFile = cityDataFiles[city];
-
-    fetch(dataFile)
-        .then(response => response.json())
-        .then(data => {
-            if (!data.features || data.features.length === 0) return;
-
-            if (buildingLayer) {
-                map.removeLayer(buildingLayer);
-            }
-
-            const buildingCounts = {};
-
-            const filteredData = {
-                ...data,
-                features: data.features.filter(feature => {
-                    const constructionYear = extractYear(feature.properties.beginning);
-                    if (constructionYear >= minYear && constructionYear <= maxYear) {
-                        buildingCounts[constructionYear] = (buildingCounts[constructionYear] || 0) + 1;
-                        return true;
-                    }
-                    return false;
-                })
-            };
-
-            buildingLayer = L.geoJSON(filteredData, {
-                style: function(feature) {
-                    const year = extractYear(feature.properties.beginning);
-                    return {
-                        color: getColor(year),
-                        weight: 1,
-                        fillOpacity: 0.5
-                    };
-                },
-                onEachFeature: function(feature, layer) {
-                    const year = extractYear(feature.properties.beginning);
-                    layer.bindPopup(`Building Age: ${year}`);
-                }
-            }).addTo(map);
-
-            updateChart(buildingCounts);
-        })
-        .catch(error => console.error('Error loading GeoJSON data:', error));
+function updateKpis({ total, avg, median }){
+  kpiTotal.textContent = total ? total.toLocaleString() : '0';
+  kpiAvg.textContent = avg ?? '—';
+  kpiMedian.textContent = median ?? '—';
+}
+function updateYearBadge(){ yearBadge.textContent = `${yearMin} – ${yearMax}`; }
+function paintRange(){
+  const min = +yearMinEl.min, max = +yearMinEl.max;
+  const p1 = ((yearMin - min)/(max-min))*100;
+  const p2 = ((yearMax - min)/(max-min))*100;
+  const track = `linear-gradient(90deg,
+    rgba(255,255,255,0.08) 0%,
+    rgba(255,255,255,0.08) ${p1}%,
+    rgba(163,214,154,0.45) ${p1}%,
+    rgba(163,214,154,0.45) ${p2}%,
+    rgba(255,255,255,0.08) ${p2}%,
+    rgba(255,255,255,0.08) 100%)`;
+  yearMinEl.style.background = track;
+  yearMaxEl.style.background = track;
 }
 
-loadBuildingsByYearRange(1900, 2024);
+let buildingData;
+let debounceTimer;
+function triggerUpdate(){ clearTimeout(debounceTimer); debounceTimer = setTimeout(updateAll, 110); }
 
-const yearSliderMin = document.getElementById('year-slider-min');
-const yearSliderMax = document.getElementById('year-slider-max');
-const yearRangeDisplay = document.getElementById('year-range');
-
-function updateYearRange() {
-    const minYear = parseInt(yearSliderMin.value);
-    const maxYear = parseInt(yearSliderMax.value);
-    yearRangeDisplay.innerText = `${minYear} - ${maxYear}`;
-    loadBuildingsByYearRange(minYear, maxYear);
+async function updateAll(){
+  const gj = buildingData || await loadCityData(currentCity);
+  buildingData = gj;
+  const filteredFeatures = renderLayer(gj);
+  const { labels, values, total, avg, median } = computeEraCounts(filteredFeatures);
+  chart.data.labels = labels;
+  chart.data.datasets[0].data = values;
+  chart.update();
+  updateKpis({ total, avg, median });
 }
 
-yearSliderMin.addEventListener('input', updateYearRange);
-yearSliderMax.addEventListener('input', updateYearRange);
+/* City select */
+function populateCitySelect(){
+  if(!citySelect) return;
+  citySelect.innerHTML = '';
+  for(const key of Object.keys(cityCoordinates)){
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = key === 'coruna' ? 'A Coruña'
+      : key === 'grancanaria' ? 'Las Palmas de Gran Canaria'
+      : key.charAt(0).toUpperCase()+key.slice(1);
+    if(key===currentCity) opt.selected = true;
+    citySelect.appendChild(opt);
+  }
+}
+citySelect?.addEventListener('change', async () => {
+  currentCity = citySelect.value;
+  fitOnNextRender = true;
+  map.setView(cityCoordinates[currentCity], 14);
+  buildingData = await loadCityData(currentCity);
+  triggerUpdate();
+  const u = new URL(location.href);
+  u.searchParams.set('city', currentCity);
+  history.replaceState(null,'',u.toString());
+});
+
+/* Year range */
+yearMinEl?.addEventListener('input', ()=>{
+  const v = +yearMinEl.value;
+  yearMin = Math.min(v, yearMax);
+  updateYearBadge(); paintRange(); triggerUpdate();
+});
+yearMaxEl?.addEventListener('input', ()=>{
+  const v = +yearMaxEl.value;
+  yearMax = Math.max(v, yearMin);
+  updateYearBadge(); paintRange(); triggerUpdate();
+});
+
+/* Reset */
+resetBtn?.addEventListener('click', ()=>{
+  yearMin = 1900; yearMax = 2024;
+  yearMinEl.value = 1900; yearMaxEl.value = 2024;
+  updateYearBadge(); paintRange(); triggerUpdate();
+});
+
+/* Init */
+(async function init(){
+  populateCitySelect();
+  map.setView(cityCoordinates[currentCity], 14);
+  updateYearBadge(); paintRange();
+  await updateAll();
+})();

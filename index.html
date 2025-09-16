@@ -1,34 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>City Selection - Building Age Visualization</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Select a City • Building Age</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
 </head>
-<body>
-    <div class="title-container">
-        <h1 class="title">Select a City for Building Age Visualization</h1>
-    </div>
+<body class="home">
+  <header class="appbar">
+    <h1 class="appbar__title">Building Age Explorer</h1>
+  </header>
 
-    <div class="city-selection-container">
-        <button class="city-button" onclick="selectCity('gandia')">Gandia</button>
-        <button class="city-button" onclick="selectCity('crevillente')">Crevillente</button> 
-        <button class="city-button" onclick="selectCity('valencia')">Valencia</button>
-        <button class="city-button" onclick="selectCity('benidorm')">Benidorm</button>
-        <button class="city-button" onclick="selectCity('elche')">Elche</button>
-        <button class="city-button" onclick="selectCity('alcoy')">Alcoy</button>
-        <button class="city-button" onclick="selectCity('coruna')">A Coruña</button> <!-- New city button for A Coruña -->
-        <button class="city-button" onclick="selectCity('antigua')">Antigua</button>
-        <button class="city-button" onclick="selectCity('grancanaria')">Las Palmas de Gran Canaria</button>
-    </div>
+  <main class="home__content">
+    <section class="intro">
+      <h2>Choose a city</h2>
+      <p>Explore building footprints by construction period of a number of Spanish cities.</p>
+      <div class="search-wrap">
+        <input id="citySearch" class="search" type="search" placeholder="Search city…" autocomplete="off">
+      </div>
+    </section>
 
-    <script>
-        function selectCity(city) {
-            // Navigate to the visualization page with the selected city
-            window.location.href = `visualization.html?city=${city}`;
-        }
-    </script>
+    <section id="cityGrid" class="city-grid">
+      <!-- Each card -->
+      <article class="city-card duotone-1" data-city="gandia" data-label="Gandia" onclick="go('gandia')">
+        <div class="city-card__shine"></div>
+        <div class="city-card__content">
+          <h3>Gandia</h3>
+          <div class="city-card__meta">Valencian Community</div>
+        </div>
+      </article>
+
+      <article class="city-card duotone-2" data-city="crevillente" data-label="Crevillente" onclick="go('crevillente')">
+        <div class="city-card__shine"></div>
+        <div class="city-card__content">
+          <h3>Crevillente</h3>
+          <div class="city-card__meta">Valencian Community</div>
+        </div>
+      </article>
+
+      <article class="city-card duotone-3" data-city="valencia" data-label="Valencia" onclick="go('valencia')">
+        <div class="city-card__shine"></div>
+        <div class="city-card__content">
+          <h3>Valencia</h3>
+          <div class="city-card__meta">Capital • VC</div>
+        </div>
+      </article>
+
+      <article class="city-card duotone-4" data-city="benidorm" data-label="Benidorm" onclick="go('benidorm')">
+        <div class="city-card__shine"></div>
+        <div class="city-card__content">
+          <h3>Benidorm</h3>
+          <div class="city-card__meta">Costa Blanca</div>
+        </div>
+      </article>
+
+      <article class="city-card duotone-5" data-city="elche" data-label="Elche" onclick="go('elche')">
+        <div class="city-card__shine"></div>
+        <div class="city-card__content">
+          <h3>Elche</h3>
+          <div class="city-card__meta">Palmeral • VC</div>
+        </div>
+      </article>
+
+      <article class="city-card duotone-6" data-city="alcoy" data-label="Alcoy" onclick="go('alcoy')">
+        <div class="city-card__shine"></div>
+        <div class="city-card__content">
+          <h3>Alcoy</h3>
+          <div class="city-card__meta">Serra Mariola</div>
+        </div>
+      </article>
+
+      <article class="city-card duotone-7" data-city="coruna" data-label="A Coruña" onclick="go('coruna')">
+        <div class="city-card__shine"></div>
+        <div class="city-card__content">
+          <h3>A Coruña</h3>
+          <div class="city-card__meta">Galicia</div>
+        </div>
+      </article>
+
+      <article class="city-card duotone-8" data-city="antigua" data-label="Antigua" onclick="go('antigua')">
+        <div class="city-card__shine"></div>
+        <div class="city-card__content">
+          <h3>Antigua</h3>
+          <div class="city-card__meta">Fuerteventura</div>
+        </div>
+      </article>
+
+      <article class="city-card duotone-9" data-city="grancanaria" data-label="Las Palmas de Gran Canaria" onclick="go('grancanaria')">
+        <div class="city-card__shine"></div>
+        <div class="city-card__content">
+          <h3>Las Palmas de Gran Canaria</h3>
+          <div class="city-card__meta">Canary Islands</div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    function go(city){ location.href = `visualization.html?city=${city}`; }
+
+    // Simple live filter
+    const search = document.getElementById('citySearch');
+    const grid = document.getElementById('cityGrid');
+    search.addEventListener('input', () => {
+      const q = search.value.trim().toLowerCase();
+      [...grid.children].forEach(card=>{
+        const label = (card.getAttribute('data-label')||'').toLowerCase();
+        card.style.display = label.includes(q) ? '' : 'none';
+      });
+    });
+  </script>
 </body>
 </html>

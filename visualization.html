@@ -1,59 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Building Age Visualization</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Building Age Visualization</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <!-- Title positioned on top of the map -->
-    <div class="title-container">
-        <h1 class="title">Building Age Visualization</h1>
-        <!-- Back to Menu Button -->
-        <button class="back-button" onclick="window.location.href='index.html'">Back to Menu</button>
+  <header class="appbar">
+    <div class="appbar__left">
+      <button class="btn btn--ghost" onclick="location.href='index.html'">← Back</button>
+      <h1 class="appbar__title">Building Age Explorer</h1>
     </div>
+    <div class="appbar__right">
+      <label class="select-wrap">
+        <span class="select-label">City</span>
+        <select id="citySelect" class="select"></select>
+      </label>
+      <button id="resetBtn" class="btn btn--ghost">Reset</button>
+    </div>
+  </header>
 
-    <!-- Main Container -->
-    <div class="main-container">
-        <!-- Map Container -->
-        <div id="map"></div>
+  <main class="shell">
+    <section id="map" class="map"></section>
 
-        <!-- Right-side Container for Total Count, Average Year, Chart, and Legend -->
-        <div class="right-container">
-            <!-- Total Buildings and Average Year Display -->
-            <div class="total-info">
-                <div id="total-buildings" class="total-buildings">Total Buildings: 0</div>
-                <div id="average-year" class="average-year">Average Year: 0</div>
-            </div>
-            <!-- Chart Container -->
-            <div class="chart-container">
-                <canvas id="buildingsChart"></canvas>
-            </div>
-            <!-- Legend for Chart Colors -->
-            <div class="chart-legend">
-                <div class="legend-item"><span class="legend-color" style="background-color: #B26D5B;"></span> Before 1940</div>
-                <div class="legend-item"><span class="legend-color" style="background-color: #AE876B;"></span> 1940-1959</div>
-                <div class="legend-item"><span class="legend-color" style="background-color: #ABA27B;"></span> 1960-1979</div>
-                <div class="legend-item"><span class="legend-color" style="background-color: #A7BC8A;"></span> 1980-1999</div>
-                <div class="legend-item"><span class="legend-color" style="background-color: #A3D69A;"></span> 2000+</div>
-            </div>
+    <aside class="panel">
+      <div class="panel__section kpis">
+        <div class="kpi">
+          <div class="kpi__label">Total</div>
+          <div id="kpiTotal" class="kpi__value">—</div>
         </div>
-    </div>
+        <div class="kpi">
+          <div class="kpi__label">Average year</div>
+          <div id="kpiAvg" class="kpi__value">—</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">Median year</div>
+          <div id="kpiMedian" class="kpi__value">—</div>
+        </div>
+      </div>
 
-    <!-- Year Range Slider Container -->
-    <div class="slider-container">
-        <label for="year-slider-min">Select Year Range:</label>
-        <input type="range" id="year-slider-min" min="1900" max="2024" step="1" value="1900">
-        <input type="range" id="year-slider-max" min="1900" max="2024" step="1" value="2024">
-        <span id="year-range">1900 - 2024</span>
-    </div>
+      <div class="panel__section controls">
+        <div class="control-group">
+          <div class="control-head">
+            <div class="control-title">Year range</div>
+            <div id="yearBadge" class="badge">1900 – 2024</div>
+          </div>
+          <div class="range-row">
+            <input type="range" id="yearMin" min="1900" max="2024" value="1900" step="1"/>
+            <input type="range" id="yearMax" min="1900" max="2024" value="2024" step="1"/>
+          </div>
+          <div class="range-hint">Drag both handles to refine the selection</div>
+        </div>
+      </div>
 
-    <!-- Scripts -->
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="script.js"></script>
+      <div class="panel__section chart-wrap">
+        <div class="control-head">
+          <div class="control-title">Construction eras</div>
+        </div>
+        <canvas id="buildingsChart" height="240"></canvas>
+        <div class="legend">
+          <span><i style="background:#B26D5B"></i> ≤ 1939</span>
+          <span><i style="background:#AE876B"></i> 1940s</span>
+          <span><i style="background:#ABA27B"></i> 1950s–1970s</span>
+          <span><i style="background:#A7BC8A"></i> 1980s–1990s</span>
+          <span><i style="background:#A3D69A"></i> ≥ 2000</span>
+        </div>
+      </div>
+
+      <div id="emptyState" class="empty hidden">
+        No buildings for this range. Try widening the years.
+      </div>
+    </aside>
+  </main>
+
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <div>Loading buildings…</div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
